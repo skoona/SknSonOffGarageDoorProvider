@@ -19,6 +19,7 @@ void RelayNode::setHoldTimeInMilliseconds(const int ms)
 {
   if (ms > 200 && ms < 1000) {
     _relayHold = ms;
+    Homie.getLogger() << cIndent << "[setHoldTimeInMilliseconds] set: " << ms << endl;
   }
 }
 
