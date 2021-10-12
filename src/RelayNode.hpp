@@ -13,8 +13,8 @@ public:
   RelayNode(const char* id, const char* name, const char* cType, const int relayPin, const int relayHold);
 
   bool isReady();
-  void setHoldTimeInMilliseconds(const int ms);
   void operate();
+  void setHoldTimeInMilliseconds(const int ms);
 
 protected:
   virtual void setup() override;

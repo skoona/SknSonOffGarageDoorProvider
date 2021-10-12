@@ -12,19 +12,19 @@
 #define SKN_MOD_VERSION "1.0.0"
 #define SKN_MOD_BRAND "SknSensors"
 
-#define SKN_RELAY_TITLE "Door Relay"
+#define SKN_RELAY_TITLE "Relay Service"
 #define SKN_RELAY_TYPE "switch"
-#define SKN_RELAY_ID "Button"
+#define SKN_RELAY_ID "relayService"
 #define DEFAULT_HOLD_MS 500
 
-#define SKN_RANGER_TITLE "VL53L1x Tof Ranger"
+#define SKN_RANGER_TITLE "Ranging Service"
 #define SKN_RANGER_TYPE "measurement"
-#define SKN_RANGER_ID "Position"
+#define SKN_RANGER_ID "positionService"
 #define LOX_RUNTIME_SECONDS 30
 
-#define SKN_CTRL_TITLE "Door Controller"
+#define SKN_CTRL_TITLE "Controller"
 #define SKN_CTRL_TYPE "switch"
-#define SKN_CTRL_ID "Controller"
+#define SKN_CTRL_ID "provider"
 
 // Pins
 #define LOX_PIN_SDA 21
@@ -37,7 +37,7 @@
 #endif
 
 HomieSetting<long> cfgRelayHoldMS("relayHoldTimeMS", "Relay hold time in milliseconds.");
-HomieSetting<long> cfgIntervalSec("positionIntervalSec", "Seconds between ranging to determine door position.");
+HomieSetting<long> cfgIntervalSec("positionIntervalSec", "Seconds between ranging to verify door position.");
 HomieSetting<long> cfgDuration("duration", "Seconds to measure distance after triggered.");
 
 RelayNode door(SKN_RELAY_ID, SKN_RELAY_TITLE, SKN_RELAY_TYPE, RELAY_PIN, DEFAULT_HOLD_MS);
@@ -72,7 +72,6 @@ void setup()
       .setDefaultValue(300)
       .setValidator([](long candidate)
                     { return candidate > 59 && candidate < 3601; });
-
   cfgDuration
       .setDefaultValue(20)
       .setValidator([](long candidate)
@@ -80,6 +79,7 @@ void setup()
 
   door.setHoldTimeInMilliseconds(cfgRelayHoldMS.get());
   ranger.setRunDuration(cfgDuration.get());
+  ctrl.setIntervalInSeconds(cfgIntervalSec.get());
 
   Homie.setBroadcastHandler(broadcastHandler)
       .setLedPin(LED_BUILTIN, LOW)

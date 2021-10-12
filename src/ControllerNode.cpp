@@ -15,6 +15,15 @@ ControllerNode::ControllerNode(const char *id, const char *name, const char *cTy
 /**
  *
  */
+void ControllerNode::setIntervalInSeconds(const long seconds) {
+  if (seconds > 59 && seconds < 3601) {
+    _interval = seconds * 1000; // ms
+  }
+}
+
+/**
+ *
+ */
 void ControllerNode::operate()
 {
   if (vbEnabled) {
@@ -68,7 +77,7 @@ bool ControllerNode::handleInput(const HomieRange& range, const String& property
       }
     }
 
-    setProperty(cControllerID).send("OFF");
+    setProperty(cControllerID).send("IDLE");
 
     return true;
   }
@@ -83,6 +92,10 @@ void ControllerNode::loop() {
   if (vbEnabled)
   {
     // nothing to do here
+    if ((millis() - ulLastTimebase) >= _interval) {
+      ulLastTimebase = millis();
+      _ranger.operate();
+    }
   }
 }
 

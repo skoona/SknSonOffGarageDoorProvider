@@ -14,12 +14,10 @@ public:
   LoxRanger(const char *id, const char *name, const char *cType, const unsigned long durationInSeconds, const int gpioPin);
 
   bool isReady();
-  void setRunDuration(const int seconds);
-  void startRanging();
-  void stopRanging();
-  void operate();
   bool isOpen();
   bool isClosed();
+  void operate();
+  void setRunDuration(const int seconds);
 
 protected:
   virtual void setup() override;
@@ -64,8 +62,11 @@ private :
                 vbRunCycle = false,         // run top level for ulCycleDuration
                 vbEnabled = false;          // operating trigger
 
+  void startRanging();
+  void stopRanging();
   void printCaption();
   unsigned int handleLoxRead();
+
   VL53L1X lox;
 
 };

@@ -14,6 +14,8 @@ class ControllerNode : public HomieNode {
 public:
   ControllerNode(const char *id, const char *name, const char *cType, RelayNode& relay, LoxRanger& ranger);
 
+  void setIntervalInSeconds(const long seconds);
+
 protected:
   virtual void setup() override;
   virtual void onReadyToOperate() override;
@@ -23,6 +25,9 @@ protected:
 private:
   RelayNode& _relay;
   LoxRanger& _ranger;
+
+  long _interval = 300000;  // 300 seconds
+  unsigned long ulLastTimebase;
 
   const char *cCaption = "• Controller Module:";
   const char* cIndent  = "  ◦ ";
