@@ -2,85 +2,64 @@
 
 #include <Homie.h>
 
-#include <SPI.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-
-#include "ObserverTester.h"
-#include "Observer.h"
-#include "Subject.h"
 
 #include "RelayNode.hpp"
+#include "LoxRanger.hpp"
+#include "ControllerNode.hpp"
 
-#define SKN_MOD_NAME "Door Relay"
+#define SKN_MOD_NAME "Door Operator"
 #define SKN_MOD_VERSION "1.0.0"
 #define SKN_MOD_BRAND "SknSensors"
 
-#define SKN_NODE_TITLE "Door Relay"
-#define SKN_NODE_TYPE "switch"
-#define SKN_NODE_ID   "DoorRelay"
+#define SKN_RELAY_TITLE "Door Relay"
+#define SKN_RELAY_TYPE "switch"
+#define SKN_RELAY_ID "Button"
 #define DEFAULT_HOLD_MS 500
 
+#define SKN_RANGER_TITLE "VL53L1x Tof Ranger"
+#define SKN_RANGER_TYPE "measurement"
+#define SKN_RANGER_ID "Position"
+#define LOX_RUNTIME_SECONDS 30
+
+#define SKN_CTRL_TITLE "Door Controller"
+#define SKN_CTRL_TYPE "switch"
+#define SKN_CTRL_ID "Controller"
+
 // Pins
-#define PIN_RELAY 19 
-#define PIN_SDA 22
-#define PIN_SCL 21
+#define LOX_PIN_SDA 21
+#define LOX_PIN_SCL 22
+#define LOX_PIN_GPIO 19
+#define RELAY_PIN 18 
 
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2
 #endif
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 32 // OLED display height, in pixels
-
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-// The pins for I2C are defined by the Wire-library.
-#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
 HomieSetting<long> cfgRelayHoldMS("relayHoldTimeMS", "Relay hold time in milliseconds.");
 HomieSetting<long> cfgIntervalSec("positionIntervalSec", "Seconds between ranging to determine door position.");
-RelayNode door(SKN_NODE_ID, SKN_NODE_TITLE, SKN_NODE_TYPE, PIN_RELAY, DEFAULT_HOLD_MS);
+HomieSetting<long> cfgDuration("duration", "Seconds to measure distance after triggered.");
 
-Subject subject;
-ObserverTester observerTester;
-
-void onNotifyFromSubjectCB(int value)
-{
-  display.printf("%02d ", value);
-  display.display();
-}
+RelayNode door(SKN_RELAY_ID, SKN_RELAY_TITLE, SKN_RELAY_TYPE, RELAY_PIN, DEFAULT_HOLD_MS);
+LoxRanger ranger(SKN_RANGER_ID, SKN_RANGER_TITLE, SKN_RANGER_TYPE, LOX_RUNTIME_SECONDS, LOX_PIN_GPIO);
+ControllerNode ctrl(SKN_CTRL_ID, SKN_CTRL_TITLE, SKN_CTRL_TYPE, door, ranger);
 
 bool broadcastHandler(const String &level, const String &value)
 {
   Homie.getLogger() << "Received broadcast level " << level << ": " << value << endl;
-
-  display.printf("%s: %s", level.c_str(), value.c_str());
-  display.display();
-
   return true;
 }
 
 void setup()
 {
   Serial.begin(115200);
-
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
+  vTaskDelay(200);
+  if (!Serial)
   {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ; // Don't proceed, loop forever
+    Homie.disableLogging();
   }
 
-  // Show initial display buffer contents on the screen --
-  // the library initializes this with an Adafruit splash screen.
-  display.display();
-
-  observerTester.attachSubject(&subject);
-  subject.sknRegisterObserver(onNotifyFromSubjectCB);
+  Wire.begin(LOX_PIN_SDA, LOX_PIN_SCL, 400000U);
 
   Homie_setFirmware(SKN_MOD_NAME, SKN_MOD_VERSION);
   Homie_setBrand(SKN_MOD_BRAND);
@@ -94,7 +73,13 @@ void setup()
       .setValidator([](long candidate)
                     { return candidate > 59 && candidate < 3601; });
 
+  cfgDuration
+      .setDefaultValue(20)
+      .setValidator([](long candidate)
+                    { return candidate > 0 && candidate < 181; });
+
   door.setHoldTimeInMilliseconds(cfgRelayHoldMS.get());
+  ranger.setRunDuration(cfgDuration.get());
 
   Homie.setBroadcastHandler(broadcastHandler)
       .setLedPin(LED_BUILTIN, LOW)
@@ -103,53 +88,7 @@ void setup()
   Homie.setup();
 }
 
-uint64_t ulTimeBase;
-
 void loop()
 {
   Homie.loop();
-
-  if (Homie.isConfigured())
-  {
-    // The device is configured, in normal mode
-    if (Homie.isConnected())
-    {
-      display.setTextColor(WHITE);
-      display.clearDisplay();
-      display.setCursor(0, 0);
-      display.print("Registered Observer.");
-      display.setCursor(0, 16);
-      display.display();
-      for (int i = 0; i < 10; i++)
-      {
-        subject.setVal(i); //this will print data on Serial Monitor
-        vTaskDelay(500);
-      }
-      
-      taskYIELD();
-
-      display.clearDisplay();
-      display.setCursor(0, 0);
-      display.print("Unregister Observer");
-      display.display();
-      subject.unregisterObserver();
-      // subject.sknUnregisterObserver();
-
-      display.setCursor(0, 16);
-      for (int i = 0; i < 10; i++)
-      {
-        subject.setVal(i); // we will not be seeing any value on Serial Monitor because we unregister Observer
-        vTaskDelay(500);
-      }
-      
-      taskYIELD();
-
-      display.clearDisplay();
-      display.setCursor(0, 0);
-      display.print("Register again");
-      display.display();
-      subject.registerObserver(&observerTester);
-      // subject.sknRegisterObserver(onNotifyFromSubjectCB);
-    }
-  }
 }

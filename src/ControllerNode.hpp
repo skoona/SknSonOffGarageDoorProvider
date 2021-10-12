@@ -1,20 +1,18 @@
 /**
- * Homie Node for Relays.
+ * Homie Node for Controller.
  *
  */
 
 #pragma once
 
 #include <Homie.hpp>
+#include "RelayNode.hpp"
+#include "LoxRanger.hpp"
 
-class RelayNode : public HomieNode {
+class ControllerNode : public HomieNode {
 
 public:
-  RelayNode(const char* id, const char* name, const char* cType, const int relayPin, const int relayHold);
-
-  bool isReady();
-  void setHoldTimeInMilliseconds(const int ms);
-  void operate();
+  ControllerNode(const char *id, const char *name, const char *cType, RelayNode& relay, LoxRanger& ranger);
 
 protected:
   virtual void setup() override;
@@ -23,16 +21,16 @@ protected:
   virtual void loop() override;
 
 private:
-  int _relayPin;
-  int _relayHold;
-  
-  const char *cCaption = "• Relay Module:";
+  RelayNode& _relay;
+  LoxRanger& _ranger;
+
+  const char *cCaption = "• Controller Module:";
   const char* cIndent  = "  ◦ ";
 
-  const char *cRelayID = "operate";
+  const char *cControllerID = "operator";
 
   volatile bool vbEnabled = false;                 // operating trigger
 
-
+  void operate();
   void printCaption();
 };

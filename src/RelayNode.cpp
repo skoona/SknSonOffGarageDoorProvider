@@ -15,6 +15,14 @@ RelayNode::RelayNode(const char *id, const char *name, const char *cType, const 
 /**
  *
  */
+bool RelayNode::isReady()
+{
+  return vbEnabled;
+}
+
+/**
+ *
+ */
 void RelayNode::setHoldTimeInMilliseconds(const int ms)
 {
   if (ms > 200 && ms < 1000) {
