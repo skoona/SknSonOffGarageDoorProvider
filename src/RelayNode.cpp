@@ -10,6 +10,9 @@ RelayNode::RelayNode(const char *id, const char *name, const char *cType, const 
     _relayHold(relayHold)
 {
   printCaption();
+  if ((_relayHold > VALIDATION_MAX_MS) && (_relayHold < VALIDATION_MIN_MS)) {
+    _relayHold = VALIDATION_DEFAULT_MS;
+  }
 }
 
 /**
@@ -25,9 +28,12 @@ bool RelayNode::isReady()
  */
 void RelayNode::setHoldTimeInMilliseconds(const int ms)
 {
-  if (ms > 200 && ms < 1000) {
+  if (ms > VALIDATION_MIN_MS && ms < VALIDATION_MAX_MS)
+  {
     _relayHold = ms;
-    Homie.getLogger() << cIndent << "[setHoldTimeInMilliseconds] set: " << ms << endl;
+    Homie.getLogger() << cIndent << "setHoldTimeInMilliseconds() set: " << ms << endl;
+  } else {
+    _relayHold = VALIDATION_DEFAULT_MS;
   }
 }
 
@@ -39,7 +45,7 @@ void RelayNode::operate()
   if (vbEnabled) {
     Homie.getLogger() << cIndent << "[Start] Operating Door" << endl;
     digitalWrite(_relayPin, HIGH); // activate door relay
-    vTaskDelay(_relayHold);
+    vTaskDelay(_relayHold / portTICK_RATE_MS);
     digitalWrite(_relayPin, LOW); // de-activate door relay
     Homie.getLogger() << cIndent << "[Stop ] Operating Door" << endl;
   }
@@ -49,45 +55,14 @@ void RelayNode::operate()
  *
  */
 void RelayNode::printCaption() {
-  Homie.getLogger() << cCaption << endl;
-}
-
-/**
- * Handles the received MQTT messages from Homie.
- *
- */
-bool RelayNode::handleInput(const HomieRange& range, const String& property, const String& value) {
-
-  printCaption();
-  Homie.getLogger() << cIndent << "〽 handleInput -> property '" << property << "' value=" << value << endl;
-
-  if (property.equalsIgnoreCase(cRelayID))
-  {
-    if (value.equalsIgnoreCase("on"))
-    {
-      operate();
-    }
-    else if (value.equalsIgnoreCase("off"))
-    {
-      operate();
-    }
-
-    setProperty(cRelayID).send("OFF");
-
-    return true;
-  }
-
-  return false;
+  Homie.getLogger() << cCaption << "  " << getId() << endl;
 }
 
 /**
  *
  */
-void RelayNode::loop() {
-  if (vbEnabled)
-  {
-    // nothing to do here
-  }
+void RelayNode::loop() {  
+  taskYIELD();
 }
 
 /**
@@ -106,8 +81,6 @@ void RelayNode::onReadyToOperate() {
  *
  */
 void RelayNode::setup() {
-  printCaption();
-
   pinMode(_relayPin, OUTPUT); // Door operator
 
   digitalWrite(_relayPin, LOW); // Init door to off
@@ -118,6 +91,5 @@ void RelayNode::setup() {
       .setName("Operate Door Switch")
       .setDatatype("enum")
       .setFormat("ON,OFF")
-      .setRetained(false)
-      .settable();
+      .setRetained(false);
 }

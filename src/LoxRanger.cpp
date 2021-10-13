@@ -10,7 +10,7 @@ LoxRanger::LoxRanger(const char *id, const char *name, const char *cType, const 
       ulCycleDuration((durationInSeconds * 1000))
 {
   printCaption();
-  vbEnabled = false;
+  setRunDuration(durationInSeconds);
 }
 
 /*
@@ -65,11 +65,13 @@ bool LoxRanger::isClosed()
  *
  */
 void LoxRanger::setRunDuration(const int seconds) {
-  if (seconds != 0) {
+  if (seconds > VALIDATION_LOX_MIN_SECONDS && seconds < VALIDATION_LOX_MAX_SECONDS) {
     _ulCycleTime = (unsigned long)(seconds * 1000);
-    ulCycleDuration = setDuration(_ulCycleTime);
-    vbLastRangeCycle = true;
-  }
+  } else {
+    _ulCycleTime = VALIDATION_LOX_DEFAULT_SECONDS * 1000;
+  } 
+  ulCycleDuration = setDuration(_ulCycleTime);
+  vbLastRangeCycle = true;
 }
 
 /**
@@ -77,13 +79,6 @@ void LoxRanger::setRunDuration(const int seconds) {
  */
 void LoxRanger::operate()
 {
-  startRanging();
-}
-
-/**
- *
- */
-void LoxRanger::startRanging() {
   vbLastRangeCycle = true;
   ulCycleDuration = setDuration(_ulCycleTime);
 }
@@ -92,44 +87,17 @@ void LoxRanger::startRanging() {
  *
  */
 void LoxRanger::stopRanging() {
+  lox.stopContinuous();  
+  vTaskDelay(ulRangingDuration / portTICK_RATE_MS);
   ulCycleDuration = 0;
   vbLastRangeCycle = true;
-  vTaskDelay(ulRangingDuration);
-  lox.stopContinuous();  
 }
 
 /**
  *
  */
 void LoxRanger::printCaption() {
-  Homie.getLogger() << cCaption << endl;
-}
-
-/**
- * Handles the received MQTT messages from Homie.
- * - no settable properties
- */
-bool LoxRanger::handleInput(const HomieRange& range, const String& property, const String& value) {
-
-  printCaption();
-  Homie.getLogger() << cIndent << "〽 handleInput -> property '" << property << "' value=" << value << endl;
-
-  if (property.equalsIgnoreCase(cOperateID)) {
-    if (value.equalsIgnoreCase("on")) {
-      startRanging();      
-
-    }else if(value.equalsIgnoreCase("off")) {
-      stopRanging();
-      setProperty(cOperateID).send("OFF");
-
-    } else {
-      setProperty(cOperateID).send("ERROR");
-      
-    }
-    return true;
-  }
-
-  return false;
+  Homie.getLogger() << cCaption << "  " << getId() << endl;
 }
 
 /**
@@ -186,6 +154,7 @@ unsigned int LoxRanger::handleLoxRead() {
 
   return uiDistanceValue;
 }
+
 /**
  *
  */
@@ -261,8 +230,6 @@ void LoxRanger::onReadyToOperate() {
  *
  */
 void LoxRanger::setup() {
-  printCaption();
-
   pinMode(_pinGPIO, INPUT_PULLUP);
 
   vbEnabled = false;
@@ -270,11 +237,11 @@ void LoxRanger::setup() {
   lox.setTimeout(500);
   if (!lox.init())
   {
-    vTaskDelay(1000);
+    vTaskDelay(1000 / portTICK_RATE_MS);
     while (!lox.init())
     {
       Homie.getLogger() << "• Failed to detect and initialize sensor!" << endl;
-      vTaskDelay(1000);
+      vTaskDelay(1000 / portTICK_RATE_MS);
     }
   }
 
@@ -328,6 +295,5 @@ void LoxRanger::setup() {
       .setName("Actively Ranging")
       .setDatatype("enum")
       .setFormat(cOperateFormat)
-      .setRetained(false)
-      .settable();
+      .setRetained(false);
 }

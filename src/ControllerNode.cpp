@@ -9,6 +9,7 @@ ControllerNode::ControllerNode(const char *id, const char *name, const char *cTy
       _relay(relay),
       _ranger(ranger)
 {
+  setIntervalInSeconds(VALIDATION_DEFAULT_SECONDS);
   printCaption();
 }
 
@@ -16,8 +17,13 @@ ControllerNode::ControllerNode(const char *id, const char *name, const char *cTy
  *
  */
 void ControllerNode::setIntervalInSeconds(const long seconds) {
-  if (seconds > 59 && seconds < 3601) {
+  if (seconds > VALIDATION_MIN_SECONDS && seconds < VALIDATION_MAX_SECONDS)
+  {
     _interval = seconds * 1000; // ms
+  }
+  else
+  {
+    _interval = VALIDATION_DEFAULT_SECONDS * 1000;
   }
 }
 
@@ -32,6 +38,7 @@ void ControllerNode::operate()
     if (_ranger.isReady()) {
       _ranger.operate();
     }
+
     if (_relay.isReady())
     {
       _relay.operate();
@@ -45,7 +52,7 @@ void ControllerNode::operate()
  *
  */
 void ControllerNode::printCaption() {
-  Homie.getLogger() << cCaption << endl;
+  Homie.getLogger() << cCaption << " " << getId() << endl;
 }
 
 /**
@@ -54,7 +61,6 @@ void ControllerNode::printCaption() {
  */
 bool ControllerNode::handleInput(const HomieRange& range, const String& property, const String& value) {
 
-  printCaption();
   Homie.getLogger() << cIndent << "〽 handleInput -> property '" << property << "' value=" << value << endl;
 
   if (property.equalsIgnoreCase(cControllerID))
@@ -65,19 +71,22 @@ bool ControllerNode::handleInput(const HomieRange& range, const String& property
         operate();
       } else {
         Homie.getLogger() << cIndent << "Door is already OPEN" << endl;
-        setProperty(cControllerID).send("OPEN");
       }
+      setProperty(cControllerID).send("OPEN");
+
     } else if (value.equalsIgnoreCase("close")) {
       if (_ranger.isOpen())
       {
         operate();
       } else {
         Homie.getLogger() << cIndent << "Door is already CLOSED" << endl;
-        setProperty(cControllerID).send("CLOSE");
       }
-    }
+      setProperty(cControllerID).send("CLOSE");
 
-    setProperty(cControllerID).send("IDLE");
+    } else {
+
+      setProperty(cControllerID).send("IDLE");
+    }
 
     return true;
   }
@@ -115,14 +124,12 @@ void ControllerNode::onReadyToOperate() {
  *
  */
 void ControllerNode::setup() {
-  printCaption();
-
   vbEnabled = false;
 
   advertise(cControllerID)
       .setName("Door Operator")
       .setDatatype("enum")
       .setFormat("OPEN,CLOSE,IDLE")
-      .setRetained(false)
+      .setRetained(true)
       .settable();
 }

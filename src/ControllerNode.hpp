@@ -9,6 +9,10 @@
 #include "RelayNode.hpp"
 #include "LoxRanger.hpp"
 
+#define VALIDATION_MAX_SECONDS 3601
+#define VALIDATION_MIN_SECONDS 59
+#define VALIDATION_DEFAULT_SECONDS 1200  // 20 minutes
+
 class ControllerNode : public HomieNode {
 
 public:

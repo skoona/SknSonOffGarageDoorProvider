@@ -5,15 +5,15 @@
 </a>
 
 ## HomieNode V3 (ESP32) featuring:
-### Node: positionService
+### Node: sknSensors/GarageDoorProvider/positionService/{range|status|signal|ambient|ranging|direction} [mixed...]
 - VL53L1x Time of Flight Sensor capturing distance reading every 280 milliseconds once triggered.
 - Assumes the distance being measured is one to eight feet.
 - Runs in continuous capture mode once triggered for the seconds indicated as `duration`, set in the config.
 
-### Node: relayService
+### Node: sknSensors/GarageDoorProvider/relayService/operate {ON|OFF}
 - Operates the Relay for `relayHoldTimeMS`, as set in config, when triggered.
 
-### Node: provider
+### Node: sknSensors/GarageDoorProvider/provider/operator/set [OPEN|CLOSE]
 - Settable() node which controls the operation of relayService and positionService to operate Door to Open or Closed position.
 - Frequent verifies door position by triggering positionService every `positionIntervalSec` seconds as indicated in config.
 - Ignores OPEN or CLOSE commands if door is already in commanded positon.

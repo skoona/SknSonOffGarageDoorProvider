@@ -53,7 +53,7 @@ bool broadcastHandler(const String &level, const String &value)
 void setup()
 {
   Serial.begin(115200);
-  vTaskDelay(200);
+  vTaskDelay(200 / portTICK_RATE_MS);
   if (!Serial)
   {
     Homie.disableLogging();

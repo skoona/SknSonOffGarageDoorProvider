@@ -8,6 +8,10 @@
 #include <Homie.hpp>
 #include <VL53L1X.h>
 
+#define VALIDATION_LOX_MAX_SECONDS 181
+#define VALIDATION_LOX_MIN_SECONDS 1
+#define VALIDATION_LOX_DEFAULT_SECONDS 45
+
 class LoxRanger : public HomieNode {
 
 public:
@@ -23,7 +27,6 @@ protected:
   virtual void setup() override;
   virtual void loop() override;
   virtual void onReadyToOperate() override;
-  virtual bool handleInput(const HomieRange &range, const String &property, const String &value) override;
   unsigned long setDuration(unsigned long duration) ;
 
 private : 
@@ -46,7 +49,7 @@ private :
   const char *cAmbientID = "ambient";
   const char *cAmbientFormat = "%03.2f";
   const char *cOperateID = "ranging";
-  const char *cOperateFormat = "ON,OFF,ERROR";
+  const char *cOperateFormat = "ON,OFF";
   const char *cDirectionID = "direction";
   const char *cDirectionFormat = "CLOSING,OPENING,IDLE";
 
@@ -62,7 +65,6 @@ private :
                 vbRunCycle = false,         // run top level for ulCycleDuration
                 vbEnabled = false;          // operating trigger
 
-  void startRanging();
   void stopRanging();
   void printCaption();
   unsigned int handleLoxRead();

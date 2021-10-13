@@ -7,6 +7,10 @@
 
 #include <Homie.hpp>
 
+#define VALIDATION_MAX_MS 1000
+#define VALIDATION_MIN_MS 200
+#define VALIDATION_DEFAULT_MS 400 
+
 class RelayNode : public HomieNode {
 
 public:
@@ -19,7 +23,6 @@ public:
 protected:
   virtual void setup() override;
   virtual void onReadyToOperate() override;
-  virtual bool handleInput(const HomieRange& range, const String& property, const String& value);
   virtual void loop() override;
 
 private:
