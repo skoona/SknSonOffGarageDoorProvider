@@ -45,7 +45,7 @@
     "enabled": true
   },
   "settings": {
-    "relayHoldTimeMS": 750,
+    "relayHoldTimeMS": 400,
     "positionIntervalSec": 60,
     "duration": 45
   }

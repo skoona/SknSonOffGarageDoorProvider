@@ -30,7 +30,7 @@ private:
   int _relayHold;
   
   const char *cCaption = "• Relay Module:";
-  const char* cIndent  = "  ◦ ";
+  const char *cIndent = " ✖  ";
 
   const char *cRelayID = "operate";
 

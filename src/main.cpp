@@ -1,7 +1,7 @@
+// ESP32 ONLY
+
 #include <Arduino.h>
-
 #include <Homie.h>
-
 #include <Wire.h>
 
 #include "RelayNode.hpp"
@@ -9,7 +9,7 @@
 #include "ControllerNode.hpp"
 
 #define SKN_MOD_NAME "Door Operator"
-#define SKN_MOD_VERSION "1.0.0"
+#define SKN_MOD_VERSION "2.0.0"
 #define SKN_MOD_BRAND "SknSensors"
 
 #define SKN_RELAY_TITLE "Relay Service"
@@ -40,9 +40,9 @@ HomieSetting<long> cfgRelayHoldMS("relayHoldTimeMS", "Relay hold time in millise
 HomieSetting<long> cfgIntervalSec("positionIntervalSec", "Seconds between ranging to verify door position.");
 HomieSetting<long> cfgDuration("duration", "Seconds to measure distance after triggered.");
 
-RelayNode door(SKN_RELAY_ID, SKN_RELAY_TITLE, SKN_RELAY_TYPE, RELAY_PIN, DEFAULT_HOLD_MS);
+RelayNode relay(SKN_RELAY_ID, SKN_RELAY_TITLE, SKN_RELAY_TYPE, RELAY_PIN, DEFAULT_HOLD_MS);
 LoxRanger ranger(SKN_RANGER_ID, SKN_RANGER_TITLE, SKN_RANGER_TYPE, LOX_RUNTIME_SECONDS, LOX_PIN_GPIO);
-ControllerNode ctrl(SKN_CTRL_ID, SKN_CTRL_TITLE, SKN_CTRL_TYPE, door, ranger);
+ControllerNode ctrl(SKN_CTRL_ID, SKN_CTRL_TITLE, SKN_CTRL_TYPE, relay, ranger);
 
 bool broadcastHandler(const String &level, const String &value)
 {
@@ -77,7 +77,7 @@ void setup()
       .setValidator([](long candidate)
                     { return candidate > 0 && candidate < 181; });
 
-  door.setHoldTimeInMilliseconds(cfgRelayHoldMS.get());
+  relay.setHoldTimeInMilliseconds(cfgRelayHoldMS.get());
   ranger.setRunDuration(cfgDuration.get());
   ctrl.setIntervalInSeconds(cfgIntervalSec.get());
 

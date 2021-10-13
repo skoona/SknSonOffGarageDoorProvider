@@ -29,6 +29,32 @@ unsigned long LoxRanger::setDuration(unsigned long duration)
 /**
  *
  */
+void LoxRanger::setDirectionStatus(const int value)
+{
+  if (value == 0)
+  {
+    if (value > 2000)
+    {
+      strcpy(cDirection, "CLOSED");
+    }
+    else
+    {
+      strcpy(cDirection, "OPEN");
+    }
+  }
+  else if (value >= 1)
+  {
+    strcpy(cDirection, "OPENING");
+  }
+  else
+  {
+    strcpy(cDirection, "CLOSING");
+  }
+}
+
+/**
+ *
+ */
 bool LoxRanger::isReady()
 {
   return vbEnabled;
@@ -134,22 +160,7 @@ unsigned int LoxRanger::handleLoxRead() {
       // 0 = stable, open or closed
     }
 
-    if (idleUpDown == 0) {
-      if (value > 2000)
-      {
-        strcpy(cDirection, "CLOSED");
-      }
-      else
-      {
-        strcpy(cDirection, "OPEN");
-      }
-    } else if (idleUpDown >= 1) {
-      strcpy(cDirection, "OPENING");
-
-    } else {
-      strcpy(cDirection, "CLOSING");
-
-    }
+    setDirectionStatus(idleUpDown);
   }
 
   return uiDistanceValue;
@@ -172,7 +183,7 @@ void LoxRanger::loop()
       vbLastRangeCycle = false;
       lox.startContinuous((uint32_t)ulRangingDuration);
       setProperty(cOperateID).send("ON");
-      Homie.getLogger() << "〽 Start continuous ranging @ " << ulRangingDuration << " ms accepted." << endl;
+      Homie.getLogger() << cIndent << "Start continuous ranging @ " << ulRangingDuration << " ms accepted. ts: " << ulTimebase << endl;
     }
     
     if (vbRangeDuration && vbRunCycle) 
@@ -212,7 +223,7 @@ void LoxRanger::loop()
       lox.stopContinuous();
       vbLastRangeCycle = true;
       setProperty(cOperateID).send("OFF");
-      Homie.getLogger() << "〽 Stopping continuous ranging accepted." << endl;
+      Homie.getLogger() << cIndent << "Stopping continuous ranging accepted. ts: " << ulTimebase << endl;
     }
   }
 }
@@ -240,7 +251,7 @@ void LoxRanger::setup() {
     vTaskDelay(1000 / portTICK_RATE_MS);
     while (!lox.init())
     {
-      Homie.getLogger() << "• Failed to detect and initialize sensor!" << endl;
+      Homie.getLogger() << cIndent << "Failed to detect and initialize sensor!" << endl;
       vTaskDelay(1000 / portTICK_RATE_MS);
     }
   }

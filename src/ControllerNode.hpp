@@ -34,7 +34,7 @@ private:
   unsigned long ulLastTimebase;
 
   const char *cCaption = "• Controller Module:";
-  const char* cIndent  = "  ◦ ";
+  const char *cIndent = " ✖  ";
 
   const char *cControllerID = "operator";
 
