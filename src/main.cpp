@@ -15,7 +15,7 @@
 #define SKN_RELAY_TITLE "Relay Service"
 #define SKN_RELAY_TYPE "switch"
 #define SKN_RELAY_ID "relayService"
-#define DEFAULT_HOLD_MS 500
+#define DEFAULT_HOLD_MS 400
 
 #define SKN_RANGER_TITLE "Ranging Service"
 #define SKN_RANGER_TYPE "measurement"
