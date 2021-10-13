@@ -123,3 +123,16 @@
 20:14:24.004 > 〽 range: 271 mm 	status: range valid	signal: 19.20 MCPS	ambient: 0.02 MCPS Direction: OPEN
 20:14:24.269 > 〽 range: 270 mm 	status: range valid	signal: 19.19 MCPS	ambient: 0.02 MCPS Direction: OPEN
 ```
+
+## Contributing
+
+1. Fork it 
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
+
+
+## License
+
+The project is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
