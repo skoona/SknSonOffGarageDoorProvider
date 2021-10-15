@@ -127,10 +127,45 @@ void LoxRanger::printCaption() {
 }
 
 /**
- * @brief Collect distance and determine direction of travel
- * 
+ * IDLE, OPEN, OPENING, CLOSE, CLOSING
  */
-unsigned int LoxRanger::handleLoxRead() {
+LoxRanger::DoorStatus LoxRanger::stateMachine(int value)
+{
+
+  DoorStatus localState;
+
+  switch (value) {
+    case OPEN:
+      localState = CLOSING;
+      strcpy(cDirection, "CLOSING");
+      break;
+    case CLOSING:
+      localState = CLOSE;
+      strcpy(cDirection, "CLOSE");
+      break;
+    case CLOSE:
+      localState = OPENING;
+      strcpy(cDirection, "OPENING");
+      break;
+    case OPENING:
+      localState = OPEN;
+      strcpy(cDirection, "OPEN");
+      break;
+    default:
+      localState = IDLE; // for unknown
+      strcpy(cDirection, "IDLE");
+  }
+
+  return localState;
+}
+
+    /**
+     * @brief Collect distance and determine direction of travel
+     *
+     */
+    unsigned int
+    LoxRanger::handleLoxRead()
+{
   const int capacity = (MAX_SAMPLES - 1);
   int idleUpDown = 0;
 

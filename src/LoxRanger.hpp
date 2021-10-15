@@ -24,12 +24,14 @@ public:
   void setRunDuration(const int seconds);
 
 protected:
+
   virtual void setup() override;
   virtual void loop() override;
   virtual void onReadyToOperate() override;
   unsigned long setDuration(unsigned long duration) ;
-
+  
 private : 
+
   int _pinGPIO;
   unsigned long _ulCycleTime;
   unsigned int uiDistanceValue = 0;
@@ -65,11 +67,24 @@ private :
                 vbRunCycle = false,         // run top level for ulCycleDuration
                 vbEnabled = false;          // operating trigger
 
+  typedef enum _doorStatus{
+    IDLE,
+    OPEN,
+    OPENING,
+    CLOSE,
+    CLOSING
+  } DoorStatus;
+
+  // typedef _doorStatus DoorStatus;
+
+  DoorStatus doorState = IDLE;
+
   void stopRanging();
   void printCaption();
   unsigned int handleLoxRead();
   void setDirectionStatus(const int value);
 
   VL53L1X lox;
-
+  
+  DoorStatus stateMachine(int value);
 };
