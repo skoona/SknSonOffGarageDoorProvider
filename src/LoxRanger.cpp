@@ -13,6 +13,19 @@ LoxRanger::LoxRanger(const char *id, const char *name, const char *cType, const 
   setRunDuration(durationInSeconds);
 }
 
+/**
+ *
+ */
+void LoxRanger::setOpenThresholdMM(const int mm) {
+  thresholdOpen = mm;
+}
+/**
+ *
+ */
+void LoxRanger::setClosedThresholdMM(const int mm) {
+  thresholdClosed = mm;
+}
+
 /*
  * Utility to handle Duration Roll Overs
 */
@@ -31,24 +44,29 @@ unsigned long LoxRanger::setDuration(unsigned long duration)
  */
 void LoxRanger::setDirectionStatus(const int value)
 {
-  if (value == 0)
-  {
-    if (value > 2000)
-    {
-      strcpy(cDirection, "CLOSED");
-    }
-    else
-    {
-      strcpy(cDirection, "OPEN");
-    }
-  }
-  else if (value >= 1)
-  {
-    strcpy(cDirection, "OPENING");
-  }
-  else
-  {
-    strcpy(cDirection, "CLOSING");
+  switch(value) {
+    case IDLE:
+      if (distances[MAX_SAMPLES] >= thresholdClosed)
+      {
+        strcpy(cDirection, "CLOSED");
+      }
+      else if (distances[MAX_SAMPLES] <= thresholdOpen)
+      {
+        strcpy(cDirection, "OPEN");
+      }
+      else
+      {
+        strcpy(cDirection, "IDLE");
+      }
+      break;
+    case OPENING:
+      strcpy(cDirection, "OPENING");
+      break;
+    case CLOSING:
+      strcpy(cDirection, "CLOSING");
+      break;
+    default:
+      strcpy(cDirection, "IDLE");
   }
 }
 
@@ -67,7 +85,8 @@ bool LoxRanger::isOpen()
 {
   String value = String(cDirection);
 
-  if (value.equals("OPEN") && isReady()) {
+  if (!(value.equals("CLOSED")) && isReady())
+  {
     return true;
   }
   return false;
@@ -127,46 +146,12 @@ void LoxRanger::printCaption() {
 }
 
 /**
- * IDLE, OPEN, OPENING, CLOSE, CLOSING
+ * @brief Collect distance and determine direction of travel
+ *
  */
-LoxRanger::DoorStatus LoxRanger::stateMachine(int value)
+unsigned int LoxRanger::handleLoxRead()
 {
-
-  DoorStatus localState;
-
-  switch (value) {
-    case OPEN:
-      localState = CLOSING;
-      strcpy(cDirection, "CLOSING");
-      break;
-    case CLOSING:
-      localState = CLOSE;
-      strcpy(cDirection, "CLOSE");
-      break;
-    case CLOSE:
-      localState = OPENING;
-      strcpy(cDirection, "OPENING");
-      break;
-    case OPENING:
-      localState = OPEN;
-      strcpy(cDirection, "OPEN");
-      break;
-    default:
-      localState = IDLE; // for unknown
-      strcpy(cDirection, "IDLE");
-  }
-
-  return localState;
-}
-
-    /**
-     * @brief Collect distance and determine direction of travel
-     *
-     */
-    unsigned int
-    LoxRanger::handleLoxRead()
-{
-  const int capacity = (MAX_SAMPLES - 1);
+  const int capacity = (MAX_SAMPLES);
   int idleUpDown = 0;
 
   unsigned int value = (unsigned int)lox.read(false);
@@ -178,21 +163,27 @@ LoxRanger::DoorStatus LoxRanger::stateMachine(int value)
     distances[idx] = distances[idx+1]; // move all down
   }
 
-  distances[capacity] = lox.ranging_data.range_mm;
+  if (lox.ranging_data.range_status == 0) {
+    distances[capacity] = lox.ranging_data.range_mm;
+    uiDistanceValue = lox.ranging_data.range_mm;
+  } else {
+    distances[capacity] = uiDistanceValue;
+  }
 
   if (distances[0] > 0) {
-    idleUpDown = 0;
+    idleUpDown = (distances[0] - distances[capacity]);
 
-    for (int idx = 0; idx < capacity; idx++)
+    if (idleUpDown <= 10 || idleUpDown >= -10 )
     {
-      if (distances[idx] > (distances[idx+1] + 10)) {
-        idleUpDown--; // Closing <-1
-      }
-      if ((distances[idx] + 10) < distances[idx+1])
-      {
-        idleUpDown++; // Opening > 1
-      }
-      // 0 = stable, open or closed
+      idleUpDown = IDLE;  // idle
+    }
+    else if (idleUpDown >= 10)
+    {
+      idleUpDown = OPENING; // opening
+    }
+    else
+    {
+      idleUpDown = CLOSING; // closing
     }
 
     setDirectionStatus(idleUpDown);
@@ -243,9 +234,10 @@ void LoxRanger::loop()
 
         Homie.getLogger() << "〽 range: " << lox.ranging_data.range_mm
                           << " mm \tstatus: " << lox.rangeStatusToString(lox.ranging_data.range_status)
+                          << " raw: " << lox.ranging_data.range_status
                           << "\tsignal: " << lox.ranging_data.peak_signal_count_rate_MCPS
                           << " MCPS\tambient: " << lox.ranging_data.ambient_count_rate_MCPS
-                          << " MCPS" 
+                          << " MCPS"
                           << " Direction: " << cDirection << endl;
 
         ulLastTimebase = ulTimebase;

@@ -22,6 +22,8 @@ public:
   bool isClosed();
   void operate();
   void setRunDuration(const int seconds);
+  void setOpenThresholdMM(const int mm);
+  void setClosedThresholdMM(const int mm);
 
 protected:
 
@@ -37,6 +39,9 @@ private :
   unsigned int uiDistanceValue = 0;
   #define MAX_SAMPLES 5
   unsigned int distances[MAX_SAMPLES + 2];
+  long thresholdOpen;
+  long thresholdClosed;
+  
   char cDirection[32]; // CLOSED, OPEN, ClOSING, OPENING
 
   const char *cCaption = "• VL53L1x Ranging Module:";
@@ -67,24 +72,19 @@ private :
                 vbRunCycle = false,         // run top level for ulCycleDuration
                 vbEnabled = false;          // operating trigger
 
-  typedef enum _doorStatus{
-    IDLE,
-    OPEN,
-    OPENING,
-    CLOSE,
-    CLOSING
-  } DoorStatus;
-
-  // typedef _doorStatus DoorStatus;
-
-  DoorStatus doorState = IDLE;
-
   void stopRanging();
   void printCaption();
   unsigned int handleLoxRead();
   void setDirectionStatus(const int value);
 
-  VL53L1X lox;
-  
-  DoorStatus stateMachine(int value);
+  VL53L1X lox; 
+
+  enum DoorPosition {
+    IDLE,
+    OPEN,
+    OPENING,
+    CLOSED,
+    CLOSING
+  };
+
 };

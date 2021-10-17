@@ -9,7 +9,7 @@
 #include "ControllerNode.hpp"
 
 #define SKN_MOD_NAME "Door Operator"
-#define SKN_MOD_VERSION "2.0.0"
+#define SKN_MOD_VERSION "2.0.1"
 #define SKN_MOD_BRAND "SknSensors"
 
 #define SKN_RELAY_TITLE "Relay Service"
@@ -39,6 +39,8 @@
 HomieSetting<long> cfgRelayHoldMS("relayHoldTimeMS", "Relay hold time in milliseconds.");
 HomieSetting<long> cfgIntervalSec("positionIntervalSec", "Seconds between ranging to verify door position.");
 HomieSetting<long> cfgDuration("duration", "Seconds to measure distance after triggered.");
+HomieSetting<long> cfgOpenMM("rangerOpenMM", "fully open threshold in millimeters.");
+HomieSetting<long> cfgClosedMM("rangerClosedMM", "fully closed threshold in millimeters.");
 
 RelayNode relay(SKN_RELAY_ID, SKN_RELAY_TITLE, SKN_RELAY_TYPE, RELAY_PIN, DEFAULT_HOLD_MS);
 LoxRanger ranger(SKN_RANGER_ID, SKN_RANGER_TITLE, SKN_RANGER_TYPE, LOX_RUNTIME_SECONDS, LOX_PIN_GPIO);
@@ -77,12 +79,23 @@ void setup()
       .setValidator([](long candidate)
                     { return candidate > 0 && candidate < 181; });
 
+  cfgOpenMM
+      .setDefaultValue(200)
+      .setValidator([](long candidate)
+                    { return candidate > 10 && candidate < 400; });
+  cfgClosedMM
+      .setDefaultValue(2000)
+      .setValidator([](long candidate)
+                    { return candidate > 1000 && candidate < 3200; });
+
   relay.setHoldTimeInMilliseconds(cfgRelayHoldMS.get());
-  ranger.setRunDuration(cfgDuration.get());
   ctrl.setIntervalInSeconds(cfgIntervalSec.get());
+  ranger.setRunDuration(cfgDuration.get());
+  ranger.setOpenThresholdMM(cfgOpenMM.get());
+  ranger.setClosedThresholdMM(cfgClosedMM.get());
 
   Homie.setBroadcastHandler(broadcastHandler)
-      .setLedPin(LED_BUILTIN, LOW)
+      .setLedPin(LED_BUILTIN, HIGH)
       .disableResetTrigger();
 
   Homie.setup();
