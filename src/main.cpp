@@ -9,7 +9,7 @@
 #include "ControllerNode.hpp"
 
 #define SKN_MOD_NAME "Door Operator"
-#define SKN_MOD_VERSION "2.0.1"
+#define SKN_MOD_VERSION "2.0.2"
 #define SKN_MOD_BRAND "SknSensors"
 
 #define SKN_RELAY_TITLE "Relay Service"

@@ -17,7 +17,7 @@ public:
   RelayNode(const char* id, const char* name, const char* cType, const int relayPin, const int relayHold);
 
   bool isReady();
-  void operate();
+  void operate(bool fastSlow);
   void setHoldTimeInMilliseconds(const int ms);
 
 protected:

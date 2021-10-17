@@ -40,12 +40,16 @@ void RelayNode::setHoldTimeInMilliseconds(const int ms)
 /**
  *
  */
-void RelayNode::operate()
+void RelayNode::operate(bool fastSlow)
 {
   if (vbEnabled) {
     Homie.getLogger() << cIndent << "[Start] Operating Relay" << endl;
     digitalWrite(_relayPin, HIGH); // activate door relay
-    vTaskDelay(_relayHold / portTICK_RATE_MS);
+    if (fastSlow) {
+      vTaskDelay((_relayHold / 2) / portTICK_RATE_MS);  // half time
+    } else {
+      vTaskDelay(_relayHold / portTICK_RATE_MS);
+    }
     digitalWrite(_relayPin, LOW); // de-activate door relay
     Homie.getLogger() << cIndent << "[Stop ] Operating Relay" << endl;
   }

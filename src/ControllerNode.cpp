@@ -41,7 +41,7 @@ void ControllerNode::operate()
 
     if (_relay.isReady())
     {
-      _relay.operate();
+      _relay.operate(false); // normal or slow
     }
 
     Homie.getLogger() << cIndent << "[Stop ] Operating Door" << endl;
