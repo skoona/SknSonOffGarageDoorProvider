@@ -173,11 +173,11 @@ unsigned int LoxRanger::handleLoxRead()
   if (distances[0] > 0) {
     idleUpDown = (distances[0] - distances[capacity]);
 
-    if (idleUpDown <= 10 || idleUpDown >= -10 )
+    if (abs(idleUpDown) < 20 )
     {
       idleUpDown = IDLE;  // idle
     }
-    else if (idleUpDown >= 10)
+    else if (idleUpDown >= 60)
     {
       idleUpDown = OPENING; // opening
     }
