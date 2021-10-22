@@ -1,15 +1,24 @@
-// ESP32 ONLY
+// ESP8266 SonOff 5Vdc Relay
 
 #include <Arduino.h>
 #include <Homie.h>
+#define SDA 14
+#define SCL 12
+#define PIN_WIRE_SDA 14
+#define PIN_WIRE_SCL 12
+
 #include <Wire.h>
+extern "C"
+{
+#include <user_interface.h>
+}
 
 #include "RelayNode.hpp"
 #include "LoxRanger.hpp"
 #include "ControllerNode.hpp"
 
-#define SKN_MOD_NAME "Door Operator"
-#define SKN_MOD_VERSION "2.0.2"
+#define SKN_MOD_NAME "SonOff Door Operator"
+#define SKN_MOD_VERSION "3.0.0"
 #define SKN_MOD_BRAND "SknSensors"
 
 #define SKN_RELAY_TITLE "Relay Service"
@@ -27,14 +36,14 @@
 #define SKN_CTRL_ID "provider"
 
 // Pins
-#define LOX_PIN_SDA 21
-#define LOX_PIN_SCL 22
-#define LOX_PIN_GPIO 19
-#define RELAY_PIN 18 
+#define LOX_PIN_SDA   14
+#define LOX_PIN_SCL   12
+#define LOX_PIN_GPIO  13
+#define RELAY_PIN    5
 
-#ifndef LED_BUILTIN
-#define LED_BUILTIN 2
-#endif
+// #ifndef LED_BUILTIN
+#define LED_BUILTIN 16
+// #endif
 
 HomieSetting<long> cfgRelayHoldMS("relayHoldTimeMS", "Relay hold time in milliseconds.");
 HomieSetting<long> cfgIntervalSec("positionIntervalSec", "Seconds between ranging to verify door position.");
@@ -55,13 +64,13 @@ bool broadcastHandler(const String &level, const String &value)
 void setup()
 {
   Serial.begin(115200);
-  vTaskDelay(200 / portTICK_RATE_MS);
+  delay(200);
   if (!Serial)
   {
     Homie.disableLogging();
   }
 
-  Wire.begin(LOX_PIN_SDA, LOX_PIN_SCL, 400000U);
+  Wire.begin(LOX_PIN_SDA, LOX_PIN_SCL);
 
   Homie_setFirmware(SKN_MOD_NAME, SKN_MOD_VERSION);
   Homie_setBrand(SKN_MOD_BRAND);

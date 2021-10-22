@@ -6,6 +6,10 @@
 #pragma once
 
 #include <Homie.hpp>
+extern "C"
+{
+#include <user_interface.h>
+}
 
 #define VALIDATION_MAX_MS 1000
 #define VALIDATION_MIN_MS 200
@@ -28,7 +32,7 @@ protected:
 private:
   int _relayPin;
   int _relayHold;
-  
+  int _relayOnLevel = HIGH;
   const char *cCaption = "• Relay Module:";
   const char *cIndent = " ✖  ";
 

@@ -7,6 +7,10 @@
 
 #include <Homie.hpp>
 #include <VL53L1X.h>
+extern "C"
+{
+#include <user_interface.h>
+}
 
 #define VALIDATION_LOX_MAX_SECONDS 181
 #define VALIDATION_LOX_MIN_SECONDS 1

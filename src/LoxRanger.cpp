@@ -133,7 +133,7 @@ void LoxRanger::operate()
  */
 void LoxRanger::stopRanging() {
   lox.stopContinuous();  
-  vTaskDelay(ulRangingDuration / portTICK_RATE_MS);
+  delay(ulRangingDuration);
   ulCycleDuration = 0;
   vbLastRangeCycle = true;
 }
@@ -275,11 +275,11 @@ void LoxRanger::setup() {
   lox.setTimeout(500);
   if (!lox.init())
   {
-    vTaskDelay(1000 / portTICK_RATE_MS);
+    delay(1000);
     while (!lox.init())
     {
       Homie.getLogger() << cIndent << "Failed to detect and initialize sensor!" << endl;
-      vTaskDelay(1000 / portTICK_RATE_MS);
+      delay(1000 );
     }
   }
 
@@ -299,14 +299,14 @@ void LoxRanger::setup() {
           .setName("distance in mm")
           .setDatatype("integer")
           .setFormat(cRangeFormat)
-          .setRetained(false)
+          .setRetained(true)
           .setUnit("mm");
 
   advertise(cStatusID)
       .setName("range operating status")
       .setDatatype("string")
       .setFormat(cStatusFormat)
-      .setRetained(false)
+      .setRetained(true)
       .setUnit("#");
 
   advertise(cSignalID)

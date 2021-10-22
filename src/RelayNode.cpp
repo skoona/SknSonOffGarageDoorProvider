@@ -44,13 +44,13 @@ void RelayNode::operate(bool fastSlow)
 {
   if (vbEnabled) {
     Homie.getLogger() << cIndent << "[Start] Operating Relay" << endl;
-    digitalWrite(_relayPin, HIGH); // activate door relay
+    digitalWrite(_relayPin, _relayOnLevel); // activate door relay
     if (fastSlow) {
-      vTaskDelay((_relayHold / 2) / portTICK_RATE_MS);  // half time
+      delay((_relayHold / 2));  // half time
     } else {
-      vTaskDelay(_relayHold / portTICK_RATE_MS);
+      delay(_relayHold);
     }
-    digitalWrite(_relayPin, LOW); // de-activate door relay
+    digitalWrite(_relayPin, !_relayOnLevel); // de-activate door relay
     Homie.getLogger() << cIndent << "[Stop ] Operating Relay" << endl;
   }
 }
@@ -66,7 +66,7 @@ void RelayNode::printCaption() {
  *
  */
 void RelayNode::loop() {  
-  taskYIELD();
+  yield();
 }
 
 /**
@@ -87,7 +87,7 @@ void RelayNode::onReadyToOperate() {
 void RelayNode::setup() {
   pinMode(_relayPin, OUTPUT); // Door operator
 
-  digitalWrite(_relayPin, LOW); // Init door to off
+  digitalWrite(_relayPin, !_relayOnLevel); // Init door to off
 
   vbEnabled = false;
 

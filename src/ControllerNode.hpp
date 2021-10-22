@@ -8,6 +8,10 @@
 #include <Homie.hpp>
 #include "RelayNode.hpp"
 #include "LoxRanger.hpp"
+extern "C"
+{
+#include <user_interface.h>
+}
 
 #define VALIDATION_MAX_SECONDS 3601
 #define VALIDATION_MIN_SECONDS 59
