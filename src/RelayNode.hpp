@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <Arduino.h>
 #include <Homie.hpp>
 extern "C"
 {
@@ -33,6 +34,8 @@ private:
   int _relayPin;
   int _relayHold;
   int _relayOnLevel = HIGH;
+  int _relayOffLevel = !_relayOnLevel;
+
   const char *cCaption = "• Relay Module:";
   const char *cIndent = " ✖  ";
 

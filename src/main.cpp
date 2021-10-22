@@ -104,7 +104,7 @@ void setup()
   ranger.setClosedThresholdMM(cfgClosedMM.get());
 
   Homie.setBroadcastHandler(broadcastHandler)
-      .setLedPin(LED_BUILTIN, HIGH)
+      .setLedPin(LED_BUILTIN, LOW)
       .disableResetTrigger();
 
   Homie.setup();

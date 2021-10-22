@@ -133,7 +133,10 @@ void LoxRanger::operate()
  */
 void LoxRanger::stopRanging() {
   lox.stopContinuous();  
-  delay(ulRangingDuration);
+  // delay(ulRangingDuration);  // Delay is not working in this class ???
+  unsigned long int time_now = millis();
+  while (millis() < time_now + 1000){}
+
   ulCycleDuration = 0;
   vbLastRangeCycle = true;
 }
@@ -271,15 +274,21 @@ void LoxRanger::setup() {
   pinMode(_pinGPIO, INPUT_PULLUP);
 
   vbEnabled = false;
+  unsigned long int time_now = millis();
 
   lox.setTimeout(500);
   if (!lox.init())
   {
-    delay(1000);
+    // delay(1000); // Delay is not working in this class ???
+    time_now = millis();
+    while (millis() < time_now + 1000){}
+
     while (!lox.init())
     {
       Homie.getLogger() << cIndent << "Failed to detect and initialize sensor!" << endl;
-      delay(1000 );
+      // delay(1000 );
+      time_now = millis();
+      while (millis() < time_now + 1000){}
     }
   }
 

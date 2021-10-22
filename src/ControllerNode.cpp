@@ -35,13 +35,13 @@ void ControllerNode::operate()
   if (vbEnabled) {
     Homie.getLogger() << cIndent << "[Start] Operating Door" << endl;
     
-    if (_ranger.isReady()) {
-      _ranger.operate();
-    }
-
     if (_relay.isReady())
     {
       _relay.operate(false); // normal or slow
+    }
+
+    if (_ranger.isReady()) {
+      _ranger.operate();
     }
 
     Homie.getLogger() << cIndent << "[Stop ] Operating Door" << endl;

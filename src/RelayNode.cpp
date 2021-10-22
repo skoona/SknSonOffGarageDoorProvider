@@ -43,14 +43,20 @@ void RelayNode::setHoldTimeInMilliseconds(const int ms)
 void RelayNode::operate(bool fastSlow)
 {
   if (vbEnabled) {
-    Homie.getLogger() << cIndent << "[Start] Operating Relay" << endl;
-    digitalWrite(_relayPin, _relayOnLevel); // activate door relay
+    int delayTime = _relayHold;
+    unsigned long time_now = millis();
+
     if (fastSlow) {
-      delay((_relayHold / 2));  // half time
-    } else {
-      delay(_relayHold);
+      delayTime = _relayHold / 2; // half time
     }
-    digitalWrite(_relayPin, !_relayOnLevel); // de-activate door relay
+
+    Homie.getLogger() << cIndent << "[Start] Operating Relay pin: " << _relayPin << " level: " << _relayOnLevel << " Hold: " << delayTime << " Fast: " << fastSlow << endl;
+    digitalWrite(_relayPin, _relayOnLevel); // activate door relay
+
+    // delay(delayTime); // Delay is not working in this class ???
+    while (millis() < time_now + delayTime) {}
+
+    digitalWrite(_relayPin, _relayOffLevel); // de-activate door relay
     Homie.getLogger() << cIndent << "[Stop ] Operating Relay" << endl;
   }
 }
@@ -86,8 +92,7 @@ void RelayNode::onReadyToOperate() {
  */
 void RelayNode::setup() {
   pinMode(_relayPin, OUTPUT); // Door operator
-
-  digitalWrite(_relayPin, !_relayOnLevel); // Init door to off
+  digitalWrite(_relayPin, _relayOffLevel); // Init door to off
 
   vbEnabled = false;
 
