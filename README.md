@@ -4,24 +4,24 @@
   <img src="https://homieiot.github.io/img/works-with-homie.png" alt="works with MQTT Homie">
 </a>
 
-### This is the ESP8266 Version, the ESP32 Version is called SknGarageDoorProvider in GitHub.
+This is the ESP8266 Version, the ESP32 Version is called SknGarageDoorProvider in GitHub.
 
-## HomieNode V3 (ESP8266) featuring:
-### Node: sknSensors/GarageDoor/positionService/{range|status|signal|ambient|ranging|direction} [mixed...]
+## HomieNode V3 (ESP8266-12F) featuring:
+#### Node: sknSensors/GarageDoor/positionService/{range|status|signal|ambient|ranging|direction} [mixed...]
 - VL53L1x Time of Flight Sensor capturing distance reading every 280 milliseconds once triggered.
 - Assumes the distance being measured is one to eight feet.
 - Runs in continuous capture mode once triggered for the seconds indicated as `duration`, set in the config.
 - Additional to determine mm value limits for door OPEN=`rangerOpenMM` and for CLOSED=`rangerClosedMM`.
 
-### Node: sknSensors/GarageDoor/relayService/operate {ON|OFF}
+#### Node: sknSensors/GarageDoor/relayService/operate {ON|OFF}
 - Operates the Relay for `relayHoldTimeMS`, as set in config, when triggered.
 
-### Node: sknSensors/GarageDoor/provider/operator/set [OPEN|CLOSE]
+#### Node: sknSensors/GarageDoor/provider/operator/set [OPEN|CLOSE]
 - Settable() node which controls the operation of relayService and positionService to operate Door to Open or Closed position.
 - Frequent verifies door position by triggering positionService every `positionIntervalSec` seconds as indicated in config.
 - Ignores OPEN or CLOSE commands if door is already in commanded positon.
 
-### Common Public APIs:
+#### Common Public APIs:
 * bool isReady()                            Is Node ready and communicating?
 * void operate()                            Trigger node's action
 
