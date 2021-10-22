@@ -26,10 +26,9 @@
 * void operate()                            Trigger node's action
 
 ## Components
-- ESP8266 Relay Module, ESP-12F Development Board AC 220V DC 12V Single relay module
-- VL53L1x Time of Flight Ranging module (4M max distance; configured for 8 feet US)
-![](ESP8266RelayModule_ESP-12F_DevelopmentBoard_AC220V-DC12V_SingleRelayModule.jpg)
-<img src="ESP8266RelayModule_ESP-12F_DevelopmentBoard_AC220V-DC12V_SingleRelayModule.jpg" alt="ESP8266 Relay Module, ESP-12F Development Board AC 220V DC 12V Single relay module">
+![ESP8266 Relay Module, ESP-12F Development Board AC 220V DC 12V Single relay module](ESP8266RelayModule_ESP-12F_DevelopmentBoard_AC220V-DC12V_SingleRelayModule.jpg)
+![VL53L1x Time of Flight Ranging module, 4M max distance; configured for 8 feet US](VL53L1x.png)
+
 
 ## Homie Config: data/homie/config.json
 ```
