@@ -1,19 +1,22 @@
-# SknGarageDoorProvider
+# SknSonOffGarageDoorProvider
 
 <a href="https://homieiot.github.io/">
   <img src="https://homieiot.github.io/img/works-with-homie.png" alt="works with MQTT Homie">
 </a>
 
-## HomieNode V3 (ESP32) featuring:
-### Node: sknSensors/GarageDoorProvider/positionService/{range|status|signal|ambient|ranging|direction} [mixed...]
+### This is the ESP8266 Version, the ESP32 Version is called SknGarageDoorProvider in GitHub.
+
+## HomieNode V3 (ESP8266) featuring:
+### Node: sknSensors/GarageDoor/positionService/{range|status|signal|ambient|ranging|direction} [mixed...]
 - VL53L1x Time of Flight Sensor capturing distance reading every 280 milliseconds once triggered.
 - Assumes the distance being measured is one to eight feet.
 - Runs in continuous capture mode once triggered for the seconds indicated as `duration`, set in the config.
+- Additional to determine mm value limits for door OPEN=`rangerOpenMM` and for CLOSED=`rangerClosedMM`.
 
-### Node: sknSensors/GarageDoorProvider/relayService/operate {ON|OFF}
+### Node: sknSensors/GarageDoor/relayService/operate {ON|OFF}
 - Operates the Relay for `relayHoldTimeMS`, as set in config, when triggered.
 
-### Node: sknSensors/GarageDoorProvider/provider/operator/set [OPEN|CLOSE]
+### Node: sknSensors/GarageDoor/provider/operator/set [OPEN|CLOSE]
 - Settable() node which controls the operation of relayService and positionService to operate Door to Open or Closed position.
 - Frequent verifies door position by triggering positionService every `positionIntervalSec` seconds as indicated in config.
 - Ignores OPEN or CLOSE commands if door is already in commanded positon.
@@ -22,12 +25,17 @@
 * bool isReady()                            Is Node ready and communicating?
 * void operate()                            Trigger node's action
 
+## Components
+- ESP8266 Relay Module, ESP-12F Development Board AC 220V DC 12V Single relay module
+- VL53L1x Time of Flight Ranging module (4M max distance; configured for 8 feet US)
+![](ESP8266RelayModule_ESP-12F_DevelopmentBoard_AC220V-DC12V_SingleRelayModule.jpg)
+<img src="ESP8266RelayModule_ESP-12F_DevelopmentBoard_AC220V-DC12V_SingleRelayModule.jpg" alt="ESP8266 Relay Module, ESP-12F Development Board AC 220V DC 12V Single relay module">
 
 ## Homie Config: data/homie/config.json
 ```
 {
   "name": "Garage Door Operator",
-  "device_id": "GarageDoorProvider",
+  "device_id": "GarageDoor",
   "device_stats_interval": 900,  
   "wifi": {
     "ssid": "<wifi-host>",
@@ -46,82 +54,108 @@
   },
   "settings": {
     "relayHoldTimeMS": 400,
-    "positionIntervalSec": 60,
-    "duration": 45
+	  "positionIntervalSec": 60,
+    "duration": 45,
+    "rangerClosedMM": 2000,
+    "rangerOpenMM": 200
   }
 }
 ```
 
 ## Homie Serial Runtime Log
 ```
-20:14:15.120 >   ◦ [setHoldTimeInMilliseconds] set: 400
-20:14:15.120 > 💡 Firmware Door Operator (1.0.0)
-20:14:15.120 > 🔌 Booting into normal mode 🔌
-20:14:15.811 > {} Stored configuration
-20:14:15.814 >   • Hardware device ID: 240ac4594254
-20:14:15.817 >   • Device ID: GarageDoorProvider
-20:14:15.820 >   • Name: Garage Door Operator
-20:14:15.823 >   • Device Stats Interval: 300 sec
-20:14:15.827 >   • Wi-Fi: 
-20:14:15.828 >     ◦ SSID: SFNSS1-24G
-20:14:15.830 >     ◦ Password not shown
-20:14:15.833 >   • MQTT: 
-20:14:15.834 >     ◦ Host: openhab.skoona.net
-20:14:15.837 >     ◦ Port: 1883
-20:14:15.839 >     ◦ Base topic: sknSensors/
-20:14:15.841 >     ◦ Auth? yes
-20:14:15.843 >     ◦ Username: openhabian
-20:14:15.846 >     ◦ Password not shown
-20:14:15.848 >   • OTA: 
-20:14:15.849 >     ◦ Enabled? yes
-20:14:15.851 >   • Custom settings: 
-20:14:15.853 >     ◦ relayHoldTimeMS: 750 (set)
-20:14:15.856 >     ◦ positionIntervalSec: 60 (set)
-20:14:15.860 >     ◦ duration: 45 (set)
-20:14:15.862 > • Relay Module:
-20:14:15.864 > • VL53L1x Ranging Module:
-20:14:15.871 > 〽 Medium distance mode accepted.
-20:14:15.875 > 〽 200us timing budget accepted.
-20:14:15.878 > • Controller Module:
-20:14:15.880 > ↕ Attempting to connect to Wi-Fi...
-20:14:18.854 > ✔ Wi-Fi connected, IP: 10.100.1.244
-20:14:18.858 > Triggering WIFI_CONNECTED event...
-20:14:18.861 > ↕ Attempting to connect to MQTT...
-20:14:18.908 > Sending initial information...
-20:14:19.006 > ✔ MQTT ready
-20:14:19.008 > Triggering MQTT_READY event...
-20:14:19.011 > 〽 Node: Relay Service Ready to operate.
-20:14:19.014 > 〽 Node: Ranging Service Ready to operate.
-20:14:19.018 > 〽 Node: Controller Ready to operate.
-20:14:19.022 > Calling setup function...
-20:14:19.024 > 〽 Start continuous ranging @ 280 ms accepted.
-20:14:19.028 > 〽 Sending statistics...
-20:14:19.031 >   • Interval: 305s (300s including 5s grace time)
-20:14:19.035 >   • Wi-Fi signal quality: 90%
-20:14:19.038 >   • Uptime: 4s
-20:14:19.140 > 📢 Calling broadcast handler...
-20:14:19.144 > Received broadcast level alert: OH3 Offline
-20:14:19.148 > 📢 Calling broadcast handler...
-20:14:19.151 > Received broadcast level LWT: HomieMonitor Offline!
-20:14:19.268 > 〽 range: 249 mm 	status: range valid	signal: 148.12 MCPS	ambient: 0.13 MCPS Direction: 
-20:14:19.511 > 〽 range: 271 mm 	status: range valid	signal: 20.67 MCPS	ambient: 0.02 MCPS Direction: 
-20:14:19.799 > 〽 range: 271 mm 	status: range valid	signal: 19.25 MCPS	ambient: 0.02 MCPS Direction: 
-20:14:20.095 > 〽 range: 271 mm 	status: range valid	signal: 19.14 MCPS	ambient: 0.02 MCPS Direction: 
-20:14:20.382 > 〽 range: 271 mm 	status: range valid	signal: 19.11 MCPS	ambient: 0.02 MCPS Direction: OPENING
-20:14:20.652 > 〽 range: 271 mm 	status: range valid	signal: 19.15 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:20.925 > 〽 range: 271 mm 	status: range valid	signal: 19.20 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:21.202 > 〽 range: 270 mm 	status: range valid	signal: 19.20 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:21.488 > 〽 range: 270 mm 	status: range valid	signal: 19.23 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:21.766 > 〽 range: 270 mm 	status: range valid	signal: 19.19 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:22.055 > 〽 range: 270 mm 	status: range valid	signal: 19.16 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:22.328 > 〽 range: 270 mm 	status: range valid	signal: 19.20 MCPS	ambient: 0.01 MCPS Direction: OPEN
-20:14:22.613 > 〽 range: 271 mm 	status: range valid	signal: 19.17 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:22.876 > 〽 range: 270 mm 	status: range valid	signal: 19.27 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:23.169 > 〽 range: 271 mm 	status: range valid	signal: 19.28 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:23.432 > 〽 range: 270 mm 	status: range valid	signal: 19.22 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:23.716 > 〽 range: 270 mm 	status: range valid	signal: 19.20 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:24.004 > 〽 range: 271 mm 	status: range valid	signal: 19.20 MCPS	ambient: 0.02 MCPS Direction: OPEN
-20:14:24.269 > 〽 range: 270 mm 	status: range valid	signal: 19.19 MCPS	ambient: 0.02 MCPS Direction: OPEN
+23:49:37.802 > 💡 Firmware SonOff Door Operator (3.0.0)
+23:49:37.802 > 🔌 Booting into normal mode 🔌
+23:49:37.984 > {} Stored configuration
+23:49:37.984 >   • Hardware device ID: c45bbe64ee02
+23:49:37.990 >   • Device ID: GarageDoor
+23:49:37.990 >   • Name: SonOff Garage Door Operator
+23:49:37.995 >   • Device Stats Interval: 300 sec
+23:49:37.995 >   • Wi-Fi: 
+23:49:38.000 >     ◦ SSID: SFNSS1-24G
+23:49:38.000 >     ◦ Password not shown
+23:49:38.000 >   • MQTT: 
+23:49:38.006 >     ◦ Host: openhab.skoona.net
+23:49:38.006 >     ◦ Port: 1883
+23:49:38.011 >     ◦ Base topic: sknSensors/
+23:49:38.011 >     ◦ Auth? yes
+23:49:38.011 >     ◦ Username: openhabian
+23:49:38.016 >     ◦ Password not shown
+23:49:38.016 >   • OTA: 
+23:49:38.016 >     ◦ Enabled? yes
+23:49:38.022 >   • Custom settings: 
+23:49:38.022 >     ◦ relayHoldTimeMS: 400 (set)
+23:49:38.027 >     ◦ positionIntervalSec: 60 (set)
+23:49:38.027 >     ◦ duration: 45 (set)
+23:49:38.033 >     ◦ rangerOpenMM: 200 (set)
+23:49:38.033 >     ◦ rangerClosedMM: 2000 (set)
+23:49:38.074 > 〽 Medium distance mode accepted.
+23:49:38.074 > 〽 200us timing budget accepted.
+23:49:38.090 > ↕ Attempting to connect to Wi-Fi...
+23:49:38.282 > ✔ Wi-Fi connected, IP: 10.100.1.113
+23:49:38.287 > Triggering WIFI_CONNECTED event...
+23:49:38.287 > ↕ Attempting to connect to MQTT...
+23:49:38.318 > Sending initial information...
+23:49:38.437 > ✔ MQTT ready
+23:49:38.437 > Triggering MQTT_READY event...
+23:49:38.437 > 〽 Node: Relay Service Ready to operate.
+23:49:38.442 > 〽 Node: Ranging Service Ready to operate.
+23:49:38.447 > 〽 Node: Controller Ready to operate.
+23:49:38.447 > Calling setup function...
+23:49:38.453 >  ✖  Start continuous ranging @ 250 ms accepted. ts: 962
+23:49:38.458 > 〽 Sending statistics...
+23:49:38.458 >   • Interval: 305s (300s including 5s grace time)
+23:49:38.464 >   • Wi-Fi signal quality: 100%
+23:49:38.469 >   • Uptime: 0s
+23:49:38.469 > 📢 Calling broadcast handler...
+23:49:38.469 > Received broadcast level alert: OH3 Offline
+23:49:38.474 > 📢 Calling broadcast handler...
+23:49:38.480 > Received broadcast level LWT: HomieMonitor Offline!
+23:49:38.669 > 〽 range: 347 mm 	status: range valid raw: 0	signal: 19.66 MCPS	ambient: 0.51 MCPS Direction: 
+23:49:38.914 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.15 MCPS	ambient: 0.53 MCPS Direction: 
+23:49:39.164 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.05 MCPS	ambient: 0.55 MCPS Direction: 
+23:49:39.414 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.16 MCPS	ambient: 0.53 MCPS Direction: 
+23:49:39.664 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.16 MCPS	ambient: 0.55 MCPS Direction: 
+23:49:39.914 > 〽 range: 350 mm 	status: range valid raw: 0	signal: 19.13 MCPS	ambient: 0.53 MCPS Direction: IDLE
+23:49:40.164 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.13 MCPS	ambient: 0.54 MCPS Direction: IDLE
+23:49:40.414 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.25 MCPS	ambient: 0.53 MCPS Direction: IDLE
+23:49:40.664 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.30 MCPS	ambient: 0.54 MCPS Direction: IDLE
+23:49:40.914 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.16 MCPS	ambient: 0.54 MCPS Direction: IDLE
+23:49:41.164 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.09 MCPS	ambient: 0.54 MCPS Direction: IDLE
+23:49:41.414 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.33 MCPS	ambient: 0.52 MCPS Direction: IDLE
+23:49:41.664 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.09 MCPS	ambient: 0.55 MCPS Direction: IDLE
+23:49:41.914 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.35 MCPS	ambient: 0.52 MCPS Direction: IDLE
+23:49:42.164 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.21 MCPS	ambient: 0.54 MCPS Direction: IDLE
+
+...
+
+23:49:55.164 > 〽 range: 350 mm 	status: range valid raw: 0	signal: 19.39 MCPS	ambient: 0.53 MCPS Direction: IDLE
+23:49:55.414 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.37 MCPS	ambient: 0.53 MCPS Direction: IDLE
+23:49:55.664 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.29 MCPS	ambient: 0.55 MCPS Direction: IDLE
+23:49:55.914 > 〽 range: 350 mm 	status: range valid raw: 0	signal: 19.38 MCPS	ambient: 0.54 MCPS Direction: IDLE
+23:49:56.164 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.42 MCPS	ambient: 0.53 MCPS Direction: IDLE
+23:49:56.413 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.30 MCPS	ambient: 0.54 MCPS Direction: IDLE
+23:49:56.664 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.27 MCPS	ambient: 0.55 MCPS Direction: IDLE
+23:49:56.914 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.27 MCPS	ambient: 0.55 MCPS Direction: IDLE
+23:49:57.163 > 〽 range: 350 mm 	status: range valid raw: 0	signal: 19.34 MCPS	ambient: 0.53 MCPS Direction: IDLE
+23:49:57.414 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.32 MCPS	ambient: 0.54 MCPS Direction: IDLE
+23:49:57.664 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.38 MCPS	ambient: 0.53 MCPS Direction: IDLE
+23:49:57.914 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.31 MCPS	ambient: 0.54 MCPS Direction: IDLE
+23:49:58.163 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.35 MCPS	ambient: 0.53 MCPS Direction: IDLE
+23:49:58.413 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.46 MCPS	ambient: 0.52 MCPS Direction: IDLE
+23:49:58.445 >  ✖  Stopping continuous ranging accepted. ts: 20954
+23:50:03.665 >  ✖  〽 handleInput -> property 'operator' value=close
+23:50:03.665 >  ✖  [Start] Operating Door
+23:50:03.670 >  ✖  [Start] Operating Relay pin: 5 level: 1 Hold: 400 Fast: 0
+23:50:04.066 >  ✖  [Stop ] Operating Relay
+23:50:04.066 >  ✖  [Stop ] Operating Door
+23:50:04.066 >  ✖  Start continuous ranging @ 250 ms accepted. ts: 26586
+23:50:04.289 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 18.89 MCPS	ambient: 0.50 MCPS Direction: IDLE
+23:50:04.534 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 18.95 MCPS	ambient: 0.51 MCPS Direction: IDLE
+23:50:04.787 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.26 MCPS	ambient: 0.53 MCPS Direction: IDLE
+23:50:05.037 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.15 MCPS	ambient: 0.54 MCPS Direction: IDLE
+23:50:05.287 > 〽 range: 349 mm 	status: range valid raw: 0	signal: 19.42 MCPS	ambient: 0.52 MCPS Direction: IDLE
+23:50:05.537 > 〽 range: 348 mm 	status: range valid raw: 0	signal: 19.38 MCPS	ambient: 0.53 MCPS Direction: IDLE
 ```
 
 ## Contributing
