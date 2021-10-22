@@ -2,10 +2,10 @@
 
 #include <Arduino.h>
 #include <Homie.h>
-#define SDA 14
-#define SCL 12
-#define PIN_WIRE_SDA 14
-#define PIN_WIRE_SCL 12
+#define SDA 4
+#define SCL 5
+#define PIN_WIRE_SDA 4
+#define PIN_WIRE_SCL 5
 
 #include <Wire.h>
 extern "C"
@@ -36,13 +36,13 @@ extern "C"
 #define SKN_CTRL_ID "provider"
 
 // Pins
-#define LOX_PIN_SDA   14
-#define LOX_PIN_SCL   12
-#define LOX_PIN_GPIO  13
-#define RELAY_PIN    5
+#define LOX_PIN_SDA   4
+#define LOX_PIN_SCL   5
+#define LOX_PIN_GPIO  14
+#define RELAY_PIN    12
 
 // #ifndef LED_BUILTIN
-#define LED_BUILTIN 16
+#define LED_BUILTIN 13
 // #endif
 
 HomieSetting<long> cfgRelayHoldMS("relayHoldTimeMS", "Relay hold time in milliseconds.");
